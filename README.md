@@ -73,7 +73,7 @@ The program will display:
 
 - Maximum height reached
 - Horizontal distance traveled
-- A graph showing the projectileâs motion
+- A graph showing the projectile motion
 
 ## Future Improvements
 - Add air resistance
