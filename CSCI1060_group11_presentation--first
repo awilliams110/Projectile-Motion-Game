@@ -1,0 +1,211 @@
+% Final Project -- Angie Williams, Suemin Jung
+%% Initialization
+clc; clear; close all;
+
+choice = 0;
+
+%% Main Menu Loop
+while choice ~= 4
+
+    disp(' ')
+    disp('================ PROJECTILE MOTION MENU ================')
+    disp('1. Run projectile simulator')
+    disp('2. Compare two launches')
+    disp('3. Play the optimal launch game')
+    disp('4. Exit')
+    disp('========================================================')
+    
+    choice = input('Enter your choice (1-4): ');
+    
+    %% 1. Projectile simulator
+    if choice == 1
+        clc
+        disp('PROJECTILE SIMULATOR')
+        
+        velocity = input('Enter the launch velocity (m/s): ');
+        angle = input('Enter the launch angle (degrees): ');
+        
+        g = 9.8;
+        
+        vx = velocity * cosd(angle);
+        vy = velocity * sind(angle);
+        
+        time = (2 * vy) / g;
+        range = vx * time;
+        maxHeight = (vy^2) / (2 * g);
+        
+        t = linspace(0, time, 100);
+        x = vx * t;
+        y = vy * t - 0.5 * g * t.^2;
+        
+        disp(' ')
+        fprintf('Horizontal velocity: %.2f m/s\n', vx)
+        fprintf('Vertical velocity: %.2f m/s\n', vy)
+        fprintf('Time of flight: %.2f s\n', time)
+        fprintf('Maximum height: %.2f m\n', maxHeight)
+        fprintf('Horizontal range: %.2f m\n', range)
+        
+        figure
+        plot(x, y, 'LineWidth', 2)
+        xlabel('Horizontal Distance (m)')
+        ylabel('Vertical Height (m)')
+        title('Projectile Motion')
+        grid on
+        
+    %% 2. Compare two launches
+    elseif choice == 2
+        clc
+        disp('COMPARE TWO LAUNCHES')
+        
+        disp('Launch 1')
+        velocity1 = input('Enter velocity for launch 1 (m/s): ');
+        angle1 = input('Enter angle for launch 1 (degrees): ');
+        
+        disp(' ')
+        disp('Launch 2')
+        velocity2 = input('Enter velocity for launch 2 (m/s): ');
+        angle2 = input('Enter angle for launch 2 (degrees): ');
+        
+        g = 9.8;
+        
+        vx1 = velocity1 * cosd(angle1);
+        vy1 = velocity1 * sind(angle1);
+        time1 = (2 * vy1) / g;
+        range1 = vx1 * time1;
+        maxHeight1 = (vy1^2) / (2 * g);
+        
+        vx2 = velocity2 * cosd(angle2);
+        vy2 = velocity2 * sind(angle2);
+        time2 = (2 * vy2) / g;
+        range2 = vx2 * time2;
+        maxHeight2 = (vy2^2) / (2 * g);
+        
+        t1 = linspace(0, time1, 100);
+        x1 = vx1 * t1;
+        y1 = vy1 * t1 - 0.5 * g * t1.^2;
+        
+        t2 = linspace(0, time2, 100);
+        x2 = vx2 * t2;
+        y2 = vy2 * t2 - 0.5 * g * t2.^2;
+        
+        disp(' ')
+        fprintf('Launch 1 range: %.2f m\n', range1)
+        fprintf('Launch 1 max height: %.2f m\n', maxHeight1)
+        fprintf('Launch 2 range: %.2f m\n', range2)
+        fprintf('Launch 2 max height: %.2f m\n', maxHeight2)
+        
+        if range1 > range2
+            disp('Launch 1 went farther.')
+        elseif range2 > range1
+            disp('Launch 2 went farther.')
+        else
+            disp('Both launches went the same distance.')
+        end
+        
+        figure
+        plot(x1, y1, 'b', 'LineWidth', 2)
+        hold on
+        plot(x2, y2, 'r', 'LineWidth', 2)
+        xlabel('Horizontal Distance (m)')
+        ylabel('Vertical Height (m)')
+        title('Comparison of Two Launches')
+        legend('Launch 1', 'Launch 2')
+        grid on
+        hold off
+        
+%% 3. Optimal launch game (Find the best angle with height)
+elseif choice == 3
+    clc
+    disp('OPTIMAL LAUNCH GAME')
+    disp('Velocity and launch height are given.')
+    disp('Try to find the best angle for maximum distance.')
+    disp('You have 5 attempts.')
+    disp(' ')
+
+    g = 9.8;
+
+    % Random conditions
+    fixedVelocity = randi([20, 100]);
+    h = randi([0, 20]);
+
+    fprintf('Velocity: %d m/s\n', fixedVelocity)
+    fprintf('Launch height: %d m\n', h)
+
+    bestRange = 0;
+    bestAngle = 0;
+
+    % Find optimal angle under new condition
+    for a = 10:1:80
+        vx = fixedVelocity * cosd(a);
+        vy = fixedVelocity * sind(a);
+
+        % Solve time when projectile hits ground (y = 0)
+        % h + vy*t - 0.5*g*t^2 = 0
+        t = (vy + sqrt(vy^2 + 2*g*h)) / g;
+
+        range = vx * t;
+
+        if range > bestRange
+            bestRange = range;
+            bestAngle = a;
+        end
+    end
+
+    % 5 attempts
+    for attempt = 1:5
+
+        fprintf('\nAttempt %d of 5\n', attempt)
+
+        userAngle = input('Enter angle (10–80 degrees): ');
+
+        vx = fixedVelocity * cosd(userAngle);
+        vy = fixedVelocity * sind(userAngle);
+        t = (vy + sqrt(vy^2 + 2*g*h)) / g;
+        userRange = vx * t;
+
+        angleError = abs(bestAngle - userAngle);
+
+    
+        if angleError == 0
+            disp('Perfect! You found the optimal angle.')
+            fprintf('Best angle: %.2f degrees\n', bestAngle)
+            fprintf('Maximum range: %.2f m\n', bestRange)
+            break;
+        end
+
+   
+        if attempt < 5
+
+            if angleError <= 2
+                disp('Very close!')
+            elseif angleError <= 5
+                disp('Close.')
+            else
+                disp('Far from optimal.')
+            end
+
+            if userAngle < bestAngle
+                disp('Increase angle.')
+            else
+                disp('Decrease angle.')
+            end
+
+        else
+            disp(' ')
+            disp('Final Attempt Results:')
+            fprintf('Your angle: %.2f degrees\n', userAngle)
+            fprintf('Best angle: %.2f degrees\n', bestAngle)
+            fprintf('Maximum range: %.2f m\n', bestRange)
+        end
+
+    end
+    %% 4. Exit
+    elseif choice == 4
+        disp('Exiting program...')
+        disp('Thank you for using the program.')
+    %% Invalid input
+    else
+        disp('Invalid choice. Please enter 1, 2, 3, or 4.')
+    end
+
+end
